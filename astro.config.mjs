@@ -19,5 +19,8 @@ export default defineConfig({
 				}
 			],
 		}),
-	]
+	],
+	redirects: {
+		"/": "/itm/practicies/flow-diagrams",
+	}
 });
