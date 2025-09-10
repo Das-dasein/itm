@@ -14,11 +14,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout your repository using git
+      - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Install, build, and upload your site
+
+      - name: Build with Astro
         uses: withastro/action@v3
-      - name: Add Nojekyll
+        with:
+          path: . 
+          node-version: 20
+          package-manager: npm
+      - name: Add .nojekyll
         run: touch dist/.nojekyll
 
   deploy:
