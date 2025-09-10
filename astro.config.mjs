@@ -14,15 +14,15 @@ export default defineConfig({
 				{
 					label: 'Практики',
 					items: [
-						{ label: 'Первая практика', slug: 'guides/flow-diagrams' },
+						{ label: 'Первая практика', slug: 'practicies/flow-diagrams' },
 					],
 				}
 			],
 		}),
 	],
 	redirects: {
-		"/": {
-			destination: "/guides/flow-diagrams",
+		"/itm/": {
+			destination: "/practicies/flow-diagrams",
 			status: 302
 		}
 	}
