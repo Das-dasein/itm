@@ -21,9 +21,9 @@ export default defineConfig({
 		}),
 	],
 	redirects: {
-		"/itm/": {
-			destination: "/itm/practicies/flow-diagrams",
-			status: 302
-		}
+	  "/": {
+	    destination: "/practicies/flow-diagrams",
+	    status: 302
+	  }
 	}
 });
