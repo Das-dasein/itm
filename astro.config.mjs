@@ -4,8 +4,10 @@ import starlight from '@astrojs/starlight';
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://das-dasein.github.io/itm/',
+	site: 'https://das-dasein.github.io',
 	base: '/itm/',
+	output: 'static',
+	adapter: undefined,
 	integrations: [
 		starlight({
 			title: 'Введение в специальность',
