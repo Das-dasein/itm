@@ -73,7 +73,7 @@ export default function Tree() {
             for (let i = 1; i < points.length; i++) {
                 ctx.lineTo(points[i].x, -points[i].y);
             }
-            ctx.strokeStyle = 'hsl(224, 100%, 85%)';
+            ctx.strokeStyle = 'rgb(100, 200, 100)';
             ctx.globalAlpha = 0.3;
             ctx.lineWidth = 1;
             ctx.stroke();
