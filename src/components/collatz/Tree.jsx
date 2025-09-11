@@ -22,6 +22,38 @@ export default function Tree() {
         setBranches(newBranches);
     }, [angle, range]);
 
+    const centerBranches = () => {
+        if (!canvasRef.current || !branches.length) return;
+
+        const canvas = canvasRef.current;
+        const width = canvas.width;
+        const height = canvas.height;
+
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        branches.forEach(branch => {
+            branch.forEach(p => {
+                minX = Math.min(minX, p.x);
+                maxX = Math.max(maxX, p.x);
+                minY = Math.min(minY, -p.y);
+                maxY = Math.max(maxY, -p.y);
+            });
+        });
+
+        const scaleX = width / (maxX - minX);
+        const scaleY = height / (maxY - minY);
+        const scale = Math.min(scaleX, scaleY) * 0.9;
+
+        const tx = (width - (minX + maxX) * scale) / 2;
+        const ty = (height - (minY + maxY) * scale) / 2;
+
+        const newTransform = d3.zoomIdentity.translate(tx, ty).scale(scale);
+
+        const canvasSel = d3.select(canvas);
+        canvasSel.call(d3.zoom().transform, newTransform);
+
+        transformRef.current = newTransform;
+    };
+
     const draw = () => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -51,6 +83,7 @@ export default function Tree() {
     };
 
     useEffect(() => {
+        centerBranches();
         draw();
     }, [branches]);
 
@@ -71,21 +104,20 @@ export default function Tree() {
     }, [branches]);
     return (
         <>
-            <label>
-                Угол:
-                <input
-                    type="number"
-                    inputMode="numeric"
-                    value={angle}
-                    onChange={e => setAngle(parseFloat(e.target.value))}
-                    step={1}
-                    min={0}
-                    max={90}
-                />
-            </label>
-
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginTop: '0.5rem' }}>
-                <label >
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+                <label style={{ marginTop: 0 }}>
+                    Угол:
+                    <input
+                        type="number"
+                        inputMode="numeric"
+                        value={angle}
+                        onChange={e => setAngle(parseFloat(e.target.value))}
+                        step={1}
+                        min={0}
+                        max={90}
+                    />
+                </label>
+                <label style={{ marginTop: 0 }}>
                     От:
                     <input
                         type="number"
@@ -116,7 +148,6 @@ export default function Tree() {
                 width={800}
                 height={600}
                 style={{
-                    border: '1px solid black',
                     marginTop: '1rem',
                     width: '100%',
                     height: '50vh',
