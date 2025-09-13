@@ -1,7 +1,9 @@
 ---
 title: "Схемы алгоритмов"
 ---
-import CollatzTree from '@/components/collatz/Tree.jsx';
+import CollatzTree from '@/components/collatz/tree/Tree.jsx';
+import CollatzFractal from '@/components/collatz/fractal/Fractal.jsx';
+
 
 ## Основные символы схем алгоритмов
 
@@ -153,7 +155,14 @@ int a = 10; // This is a comment
 </details>
 
 #### Визуализация в виде фрактала
-https://www.shadertoy.com/view/llcGDS
+<details>
+  <summary>
+    Тык
+  </summary>
+  <div>
+    <CollatzFractal client:visible/>
+  </div>
+</details>
 
 ### Биологическая
 Цепочка ДНК состоит из четырёх нуклеотидов:

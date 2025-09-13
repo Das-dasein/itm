@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { collatz_tree_branch } from './tree.js';
-import collatz_data from './collatz.txt?raw';
+import collatz_data from '../collatz.txt?raw';
 import * as d3 from 'd3';
 
 export default function Tree() {
@@ -14,14 +14,9 @@ export default function Tree() {
     const [branches, setBranches] = useState([]);
 
     const canvasRef = useRef(null);
-    const offscreenCanvasRef = useRef(null);
     const transformRef = useRef(d3.zoomIdentity);
     const zoomRef = useRef(null);
-    const bboxRef = useRef({ minX: 0, maxX: 0, minY: 0, maxY: 0, offW: 1, offH: 1 });
-
-    useEffect(() => {
-        offscreenCanvasRef.current = document.createElement('canvas');
-    }, []);
+    const bboxRef = useRef({ minX: 0, maxX: 0, minY: 0, maxY: 0, w: 1, h: 1 });
 
     useEffect(() => {
         const angle_rad = angle * Math.PI / 180;
@@ -30,24 +25,7 @@ export default function Tree() {
         setBranches(newBranches);
     }, [angle, range]);
 
-    const ensureVisibleCanvasSize = () => {
-        const canvas = canvasRef.current;
-        if (!canvas) return { displayWidth: 0, displayHeight: 0, dpr: 1 };
-        const dpr = window.devicePixelRatio || 1;
-        const displayWidth = Math.max(1, Math.floor(canvas.clientWidth));
-        const displayHeight = Math.max(1, Math.floor(canvas.clientHeight));
-        const needResize = canvas.width !== displayWidth * dpr || canvas.height !== displayHeight * dpr;
-        if (needResize) {
-            canvas.width = displayWidth * dpr;
-            canvas.height = displayHeight * dpr;
-        }
-        return { displayWidth, displayHeight, dpr };
-    };
-
-    const drawToOffscreen = () => {
-        const offscreen = offscreenCanvasRef.current;
-        if (!offscreen || !branches.length) return;
-
+    const computeBBox = () => {
         let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
         branches.forEach(branch => {
             branch.forEach(p => {
@@ -57,24 +35,35 @@ export default function Tree() {
                 maxY = Math.max(maxY, -p.y);
             });
         });
-
         if (!isFinite(minX)) return;
+        bboxRef.current = { minX, maxX, minY, maxY, w: maxX - minX, h: maxY - minY };
+    };
 
-        const offW = Math.max(1, maxX - minX);
-        const offH = Math.max(1, maxY - minY);
+    const drawVisible = () => {
+        const canvas = canvasRef.current;
+        if (!canvas || !branches.length) return;
+
+        const ctx = canvas.getContext('2d');
         const dpr = window.devicePixelRatio || 1;
+        const displayWidth = Math.max(1, Math.floor(canvas.clientWidth));
+        const displayHeight = Math.max(1, Math.floor(canvas.clientHeight));
 
-        offscreen.width = Math.ceil(offW * dpr);
-        offscreen.height = Math.ceil(offH * dpr);
+        if (canvas.width !== displayWidth * dpr || canvas.height !== displayHeight * dpr) {
+            canvas.width = displayWidth * dpr;
+            canvas.height = displayHeight * dpr;
+        }
 
-        const ctx = offscreen.getContext('2d');
         ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.clearRect(0, 0, offscreen.width, offscreen.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        ctx.setTransform(dpr, 0, 0, dpr, -minX * dpr, -minY * dpr);
+        ctx.save();
+        ctx.scale(dpr, dpr);
+
+        ctx.translate(transformRef.current.x, transformRef.current.y);
+        ctx.scale(transformRef.current.k, transformRef.current.k);
 
         ctx.globalAlpha = 0.3;
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 1 / transformRef.current.k;
         ctx.strokeStyle = 'rgb(100, 200, 100)';
 
         for (const pts of branches) {
@@ -85,53 +74,25 @@ export default function Tree() {
             ctx.stroke();
         }
 
-        bboxRef.current = { minX, maxX, minY, maxY, offW, offH };
-    };
-
-    const drawVisible = () => {
-        const canvas = canvasRef.current;
-        const offscreen = offscreenCanvasRef.current;
-        if (!canvas || !offscreen) return;
-
-        const ctx = canvas.getContext('2d');
-        const { displayWidth, displayHeight, dpr } = ensureVisibleCanvasSize();
-        if (!displayWidth || !displayHeight) return;
-
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-        ctx.translate(transformRef.current.x, transformRef.current.y);
-        ctx.scale(transformRef.current.k, transformRef.current.k);
-
-        const offscreenCSSW = offscreen.width / dpr;
-        const offscreenCSSH = offscreen.height / dpr;
-
-        ctx.drawImage(offscreen, 0, 0, offscreenCSSW, offscreenCSSH);
-
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.restore();
     };
 
     const centerBranches = () => {
         const canvas = canvasRef.current;
-        const off = offscreenCanvasRef.current;
-        if (!canvas || !off || !branches.length) return;
+        if (!canvas || !branches.length) return;
 
+        const { w, h, minX, minY } = bboxRef.current;
         const cssW = Math.max(1, Math.floor(canvas.clientWidth));
         const cssH = Math.max(1, Math.floor(canvas.clientHeight));
-        const { offW, offH } = bboxRef.current;
-        if (!offW || !offH) return;
 
-        const scale = Math.min(cssW / offW, cssH / offH) * 0.9;
-        const tx = (cssW - offW * scale) / 2;
-        const ty = (cssH - offH * scale) / 2;
+        const scale = Math.min(cssW / w, cssH / h) * 0.9;
+        const tx = (cssW - w * scale) / 2 - minX * scale;
+        const ty = (cssH - h * scale) / 2 - minY * scale;
 
         const newTransform = d3.zoomIdentity.translate(tx, ty).scale(scale);
 
-        const canvasSel = d3.select(canvas);
         if (zoomRef.current) {
-            canvasSel.transition().call(zoomRef.current.transform, newTransform);
+            d3.select(canvas).call(zoomRef.current.transform, newTransform);
         } else {
             transformRef.current = newTransform;
             drawVisible();
@@ -139,34 +100,8 @@ export default function Tree() {
     };
 
     useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-
-        const zoom = d3.zoom()
-            .scaleExtent([0.1, 20])
-            .on('zoom', (event) => {
-                transformRef.current = event.transform;
-                drawVisible();
-            });
-
-        zoomRef.current = zoom;
-        d3.select(canvas).call(zoom);
-
-        const onResize = () => {
-            ensureVisibleCanvasSize();
-            drawVisible();
-        };
-        window.addEventListener('resize', onResize);
-
-        return () => {
-            d3.select(canvas).on('.zoom', null);
-            window.removeEventListener('resize', onResize);
-        };
-    }, []);
-
-    useEffect(() => {
         if (!branches.length) return;
-        drawToOffscreen();
+        computeBBox();
         centerBranches();
         drawVisible();
     }, [branches]);
@@ -214,8 +149,6 @@ export default function Tree() {
 
             <canvas
                 ref={canvasRef}
-                width={800}
-                height={600}
                 style={{
                     marginTop: '1rem',
                     width: '100%',

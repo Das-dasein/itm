@@ -2,7 +2,7 @@ export function collatz_tree_branch(angle, sequence) {
     const points = [{x: 0, y: 0}];
     let current_x = 0;
     let current_y = 0;
-    const step_length = 10;
+    let step_length = 1;
     let current_angle = Math.PI / 2;
 
     for (let i = sequence.length - 1; i > -1; i--) {
