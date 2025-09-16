@@ -12,6 +12,7 @@ export default function Fractal() {
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.domElement.style.touchAction = 'none';
         container.appendChild(renderer.domElement);
 
         const scene = new THREE.Scene();
