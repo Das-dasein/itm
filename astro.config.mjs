@@ -3,6 +3,8 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import mdx from '@astrojs/mdx';
 import react from '@astrojs/react';
+import rehypeKatex from 'rehype-katex';
+import remarkMath from 'remark-math';
 
 // https://astro.build/config
 export default defineConfig({
@@ -23,7 +25,10 @@ export default defineConfig({
 				}
 			],
 		}),
-		mdx(),
+		mdx({
+			remarkPlugins: [remarkMath],
+			rehypePlugins: [rehypeKatex]
+		}),
 		react()
 	]
 });
