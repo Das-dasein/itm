@@ -5,6 +5,7 @@ import mdx from '@astrojs/mdx';
 import react from '@astrojs/react';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
+import mermaid from 'astro-mermaid';
 
 // https://astro.build/config
 export default defineConfig({
@@ -13,6 +14,7 @@ export default defineConfig({
 	output: 'static',
 	adapter: undefined,
 	integrations: [
+		mermaid(),
 		starlight({
 			title: 'Введение в специальность',
 			defaultLocale: 'ru',
@@ -21,13 +23,14 @@ export default defineConfig({
 					label: 'Практики',
 					items: [
 						{ label: 'Первая практика', slug: 'practicies/flow-diagrams' },
+						{ label: 'Аналитика', slug: 'practicies/analysis' },
 					],
 				}
 			],
 		}),
 		mdx({
 			remarkPlugins: [remarkMath],
-			rehypePlugins: [rehypeKatex]
+			rehypePlugins: [rehypeKatex],
 		}),
 		react()
 	]
