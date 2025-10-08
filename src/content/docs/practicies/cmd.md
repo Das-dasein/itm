@@ -3,4 +3,4 @@ title: Терминал
 
 ---
 
-[Презентация](/itm/public/cli.pdf)
+[Презентация](/itm/cli.pdf)
