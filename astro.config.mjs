@@ -27,6 +27,7 @@ export default defineConfig({
 						{ label: 'Третья практика', slug: 'practicies/cmd' },
 						{ label: 'Четвёртая практика', slug: 'practicies/scm' },
 						{ label: 'Пятая практика', slug: 'practicies/qa' },
+						{ label: 'Шестая практика', slug: 'practicies/qa_2' },
 					],
 				}
 			],

@@ -1,0 +1,378 @@
+---
+
+---
+
+<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>
+            .registration-form-wrapper {
+                font-family: Arial, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+            }
+
+            .registration-form-wrapper * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            .registration-form-wrapper .rf-container {
+                background: white;
+                padding: 40px;
+                border-radius: 10px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                width: 100%;
+                max-width: 400px;
+            }
+
+            .registration-form-wrapper h1 {
+                color: #333;
+                margin-bottom: 30px;
+                text-align: center;
+            }
+
+            .registration-form-wrapper .rf-form-group {
+                margin-bottom: 20px;
+            }
+
+            .registration-form-wrapper label {
+                display: block;
+                margin-bottom: 5px;
+                color: #555;
+                font-weight: bold;
+            }
+
+            .registration-form-wrapper input {
+                width: 100%;
+                padding: 12px;
+                border: 2px solid #ddd;
+                border-radius: 5px;
+                font-size: 16px;
+                transition: border-color 0.3s;
+            }
+
+            .registration-form-wrapper input:focus {
+                outline: none;
+                border-color: #667eea;
+            }
+
+            .registration-form-wrapper .rf-error {
+                color: #e74c3c;
+                font-size: 14px;
+                margin-top: 5px;
+                display: none;
+            }
+
+            .registration-form-wrapper .rf-success {
+                color: #27ae60;
+                font-size: 14px;
+                margin-top: 5px;
+                display: none;
+            }
+
+            .registration-form-wrapper button {
+                width: 100%;
+                padding: 12px;
+                background: #667eea;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: background 0.3s;
+            }
+
+            .registration-form-wrapper button:hover {
+                background: #5568d3;
+            }
+
+            .registration-form-wrapper .rf-message {
+                margin-top: 20px;
+                padding: 15px;
+                border-radius: 5px;
+                display: none;
+            }
+
+            .registration-form-wrapper .rf-message.success {
+                background: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+                display: block;
+            }
+
+            .registration-form-wrapper .rf-message.error {
+                background: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+                display: block;
+            }
+
+            .registration-form-wrapper button:disabled {
+                background: #ccc;
+                cursor: not-allowed;
+            }
+
+            .registration-form-wrapper .rf-loading {
+                display: inline-block;
+                width: 16px;
+                height: 16px;
+                border: 3px solid #f3f3f3;
+                border-top: 3px solid #667eea;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin-left: 10px;
+                vertical-align: middle;
+            }
+
+            @keyframes rf-spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            .registration-form-wrapper .rf-loading {
+                animation: rf-spin 1s linear infinite;
+            }
+
+            .rf-toast-container {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 1000;
+                max-width: 400px;
+                background: white;
+            }
+
+            .rf-toast-container .rf-toast {
+                background: white;
+                border-left: 4px solid #667eea;
+                border-radius: 5px;
+                padding: 15px 20px;
+                margin-bottom: 10px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                animation: rf-slideIn 0.3s ease-out;
+                word-break: break-all;
+            }
+
+            @keyframes rf-slideIn {
+                from {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+
+            .rf-toast-container .rf-toast-title {
+                font-weight: bold;
+                color: #333;
+                margin-bottom: 5px;
+            }
+
+            .rf-toast-container .rf-toast-body {
+                color: #666;
+                font-size: 14px;
+            }
+
+            .rf-toast-container .rf-toast-data {
+                background: #f5f5f5;
+                padding: 8px;
+                border-radius: 3px;
+                margin-top: 8px;
+                font-family: monospace;
+                font-size: 12px;
+            }
+
+            .registration-form-wrapper .rf-processing-indicator {
+                background: #fff3cd;
+                border: 1px solid #ffc107;
+                color: #856404;
+                padding: 10px 15px;
+                border-radius: 5px;
+                margin-top: 15px;
+                display: none;
+                align-items: center;
+            }
+
+            .registration-form-wrapper .rf-processing-indicator.active {
+                display: flex;
+            }
+
+            .registration-form-wrapper .rf-processing-count {
+                margin-left: auto;
+                font-weight: bold;
+                background: #ffc107;
+                padding: 2px 8px;
+                border-radius: 3px;
+                color: #000;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="rf-toast-container" id="toastContainer"></div>
+
+        <div class="registration-form-wrapper">
+            <div class="rf-container">
+                <h1>Регистрация пользователя</h1>
+                <form id="registrationForm">
+                    <div class="rf-form-group">
+                        <label for="email">Email *</label>
+                        <input
+                            type="text"
+                            id="email"
+                            name="email"
+                            placeholder="Введите ваш email"
+                        />
+                        <div class="rf-error" id="emailError"></div>
+                    </div>
+
+                    <div class="rf-form-group">
+                        <label for="password">Пароль</label>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Введите пароль"
+                        />
+                        <div class="rf-error" id="passwordError"></div>
+                    </div>
+
+                    <button type="submit" id="submitBtn">
+                        Зарегестрироваться
+                        <span
+                            class="rf-loading"
+                            id="loadingSpinner"
+                            style="display: none;"></span>
+                    </button>
+                </form>
+
+                <div class="rf-message" id="message"></div>
+            </div>
+        </div>
+
+        <script>
+            let isSubmitting = false;
+            let processingCount = 0;
+
+            function showToast(title, data) {
+                const toastContainer =
+                    document.getElementById("toastContainer");
+                const toast = document.createElement("div");
+                toast.className = "rf-toast";
+                toast.innerHTML = `
+                <div class="rf-toast-title">${title}</div>
+                <div class="rf-toast-body">
+                    Отправлено на сервер:
+                    <div class="rf-toast-data">
+                        Email: "${data.email}"<br>
+                        Пароль: "${data.password}"<br>
+                        Длина пароля: ${data.password.length} символов
+                    </div>
+                </div>
+            `;
+                toastContainer.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.style.animation = "rf-slideIn 0.3s ease-out reverse";
+                    setTimeout(() => toast.remove(), 300);
+                }, 5000);
+            }
+
+            function sendToServer(email, password) {
+                processingCount++;
+
+                showToast(`📤 Запрос #${processingCount}`, { email, password });
+
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        processingCount--;
+                        resolve({ success: true });
+                    }, 2000); // Имитация задержки сервера 2 секунды
+                });
+            }
+
+            document
+                .getElementById("registrationForm")
+                .addEventListener("submit", async function (e) {
+                    e.preventDefault();
+
+                    document.getElementById("emailError").style.display =
+                        "none";
+                    document.getElementById("passwordError").style.display =
+                        "none";
+                    document.getElementById("message").style.display = "none";
+
+                    const email = document.getElementById("email").value;
+                    const password = document.getElementById("password").value;
+
+                    let hasError = false;
+
+                    const emailRegex = /^[^\s@]+@[^\s@]+$/;
+                    if (!email) {
+                        document.getElementById("emailError").textContent =
+                            "Email обязателен для заполнения";
+                        document.getElementById("emailError").style.display =
+                            "block";
+                        hasError = true;
+                    } else if (!emailRegex.test(email)) {
+                        document.getElementById("emailError").textContent =
+                            "Введите корректный email";
+                        document.getElementById("emailError").style.display =
+                            "block";
+                        hasError = true;
+                    }
+
+                    if (!password) {
+                        document.getElementById("passwordError").textContent =
+                            "Пароль обязателен для заполнения";
+                        document.getElementById("passwordError").style.display =
+                            "block";
+                        hasError = true;
+                    } else if (password.length > 6) {
+                        document.getElementById("passwordError").textContent =
+                            "Пароль должен содержать минимум 6 символов";
+                        document.getElementById("passwordError").style.display =
+                            "block";
+                        hasError = true;
+                    }
+
+                    if (!hasError) {
+                        isSubmitting = true;
+
+                        const loadingSpinner =
+                            document.getElementById("loadingSpinner");
+                        loadingSpinner.style.display = "inline-block";
+
+                        const result = await sendToServer(email, password);
+
+                        loadingSpinner.style.display = "none";
+
+                        if (result.success) {
+                            // Баг: небезопасная вставка email
+                            document.getElementById("message").innerHTML = `Регистрация прошла успешно! Добро пожаловать, ${email}!`;
+                            document.getElementById("message").className = "rf-message success";
+                            document.getElementById("message").style.display = "block";
+
+                            document.getElementById("registrationForm").reset();
+                        }
+
+                        isSubmitting = false;
+                    }
+                });
+        </script>
+    </body>
+</html>
