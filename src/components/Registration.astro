@@ -280,7 +280,6 @@
                     <div class="rf-toast-data">
                         Email: "${data.email}"<br>
                         Пароль: "${data.password}"<br>
-                        Длина пароля: ${data.password.length} символов
                     </div>
                 </div>
             `;
@@ -342,7 +341,7 @@
                         document.getElementById("passwordError").style.display =
                             "block";
                         hasError = true;
-                    } else if (password.length > 6) {
+                    } else if (password.length < 6) {
                         document.getElementById("passwordError").textContent =
                             "Пароль должен содержать минимум 6 символов";
                         document.getElementById("passwordError").style.display =
@@ -362,7 +361,6 @@
                         loadingSpinner.style.display = "none";
 
                         if (result.success) {
-                            // Баг: небезопасная вставка email
                             document.getElementById("message").innerHTML = `Регистрация прошла успешно! Добро пожаловать, ${email}!`;
                             document.getElementById("message").className = "rf-message success";
                             document.getElementById("message").style.display = "block";
