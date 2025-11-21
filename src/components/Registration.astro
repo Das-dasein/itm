@@ -341,7 +341,7 @@
                         document.getElementById("passwordError").style.display =
                             "block";
                         hasError = true;
-                    } else if (password.length < 6) {
+                    } else if (password.length <= 6) {
                         document.getElementById("passwordError").textContent =
                             "Пароль должен содержать минимум 6 символов";
                         document.getElementById("passwordError").style.display =
